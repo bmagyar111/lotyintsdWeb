@@ -1,2 +1,2 @@
 # lotyintsdWeb
- Webfejlesztési keretrendszerek 2025 tavasz projektmunka - Lötyintsd fel! Ital webshop
+ SZTE Webfejlesztési keretrendszerek 2025 tavasz projektmunka - Lötyintsd fel! Ital webshop
