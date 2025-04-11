@@ -1,0 +1,11 @@
+<h1>Egyedi Ital Készítő</h1>
+<p>Minden egyedi italunk 2000Ft-ba kerül!</p>
+
+<mat-card class="custom-ital-card">
+  <mat-card-title>Sorold fel mit szeretnél az italodra:</mat-card-title>
+  <input type="text" id="ingredients" [(ngModel)]="ingredients">
+</mat-card>
+<mat-card-actions>
+<button mat-raised-button color="primary" (click)="addToCart()">Kosárba</button>
+</mat-card-actions>
+
