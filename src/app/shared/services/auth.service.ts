@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import {Router} from "@angular/router";
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -8,12 +9,15 @@ import {Router} from "@angular/router";
 export class AuthService {
 
   email: string = "";
-  authState: any = null;
+  authState$: Observable<any>;
+  private authStateSnapshot: any = null;
 
   constructor(private auth: AngularFireAuth, private router: Router)
   {
+    this.authState$ = this.auth.authState;
+
     this.auth.authState.subscribe(authState => {
-      this.authState = authState;
+      this.authStateSnapshot = authState;
     });
   }
 
@@ -34,13 +38,11 @@ export class AuthService {
   }
 
   getLoggedInUserEmail(): string{
-    if(this.authState?.email){
-      return this.authState.email;
+    if(this.authStateSnapshot?.email){
+      return this.authStateSnapshot.email;
     }else{
-      let a = JSON.parse(localStorage.getItem('user')!)
-      return a['email'];
+      const storedUser = JSON.parse(localStorage.getItem('user')!);
+      return storedUser?.email || '';
     }
   }
-
-
 }

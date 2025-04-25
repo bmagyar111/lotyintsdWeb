@@ -22,7 +22,7 @@ export class RegisterComponent {
     if(this.signupForm.get('password')?.value === this.signupForm.get('rePassword')?.value){
       this.authService.signup(this.signupForm.get('email')?.value as string, this.signupForm.get('password')?.value as string)
         .then(success => {
-          this.router.navigateByUrl('/etlap');
+          this.router.navigateByUrl('/itallap');
         }).catch(error => {
         window.alert(error);
       });

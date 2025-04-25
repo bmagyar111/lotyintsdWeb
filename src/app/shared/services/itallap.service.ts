@@ -99,7 +99,7 @@ export class ItallapService {
 
 
   addItalToFirestore(ital: ItalokFS): Promise<DocumentReference<ItalokFS>> {
-    return this.firestore.collection<ItalokFS>('pizzak').add(ital);
+    return this.firestore.collection<ItalokFS>('italok').add(ital);
   }
 
 }
