@@ -24,8 +24,8 @@ export class ItallapComponent implements OnInit {
     private itallapService: ItallapService) {}
 
   ngOnInit(): void {
-    this.loadItalDataAndAddToFirestore();
     this.loadItalData();
+    this.loadItalDataAndAddToFirestore();
     
   }
 
@@ -61,8 +61,8 @@ export class ItallapComponent implements OnInit {
 
   loadItalDataAndAddToFirestore(): void {
     //Üres-e az ital kollekció
-    this.firestore.collection('italok').get().toPromise().then(snapshot => {
-      if (snapshot?.empty) {
+    this.firestore.collection('italok').snapshotChanges().subscribe(snapshot => {
+      if (snapshot.length === 0) {
         const italokToAdd: ItalokFS[] = [
           {
             nev: 'Schweppes',
@@ -127,7 +127,7 @@ export class ItallapComponent implements OnInit {
       } else {
         console.log('Az ital kollekció már létezik a Firestoreban.');
       }
-    }).catch(error => {
+    }, error => {
       console.error('Hiba történt az ital kollekció ellenőrzése közben:', error);
     });
   }
