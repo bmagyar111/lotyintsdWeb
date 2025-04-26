@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import {Router} from "@angular/router";
+import { Router } from '@angular/router';
+import { Auth, authState, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, User } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -8,39 +8,38 @@ import { Observable } from 'rxjs';
 })
 export class AuthService {
 
-  email: string = "";
-  authState$: Observable<any>;
-  private authStateSnapshot: any = null;
+  email: string = '';
+  authState$: Observable<User | null>;
+  private authStateSnapshot: User | null = null;
 
-  constructor(private auth: AngularFireAuth, private router: Router)
-  {
-    this.authState$ = this.auth.authState;
+  constructor(private auth: Auth, private router: Router) {
+    this.authState$ = authState(this.auth);
 
-    this.auth.authState.subscribe(authState => {
+    this.authState$.subscribe(authState => {
       this.authStateSnapshot = authState;
     });
   }
 
   login(email: string, password: string) {
-    return this.auth.signInWithEmailAndPassword(email, password);
+    return signInWithEmailAndPassword(this.auth, email, password);
   }
 
   signup(email: string, password: string) {
-    return this.auth.createUserWithEmailAndPassword(email, password);
+    return createUserWithEmailAndPassword(this.auth, email, password);
   }
 
-  isUserLoggedIn() {
-    return this.auth.user;
+  isUserLoggedIn(): Observable<User | null> {
+    return authState(this.auth);
   }
 
   logout() {
-    return this.auth.signOut();
+    return signOut(this.auth);
   }
 
-  getLoggedInUserEmail(): string{
-    if(this.authStateSnapshot?.email){
+  getLoggedInUserEmail(): string {
+    if (this.authStateSnapshot?.email) {
       return this.authStateSnapshot.email;
-    }else{
+    } else {
       const storedUser = JSON.parse(localStorage.getItem('user')!);
       return storedUser?.email || '';
     }

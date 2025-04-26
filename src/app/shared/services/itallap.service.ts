@@ -1,105 +1,102 @@
 import { Injectable } from '@angular/core';
-import {AngularFirestore} from "@angular/fire/compat/firestore";
+import { Firestore, collection, addDoc, doc, setDoc, CollectionReference } from '@angular/fire/firestore';
+import { Auth, authState } from '@angular/fire/auth';
 import { ItalokFS } from '../../models/ItalokFS';
-import {AngularFireAuth} from "@angular/fire/compat/auth";
-import {Observable, of, switchMap} from "rxjs";
-import firebase from 'firebase/compat/app';
-import DocumentReference = firebase.firestore.DocumentReference;
 import { Italok } from '../../models/Italok';
-import {Custom} from "../../models/Custom";
+import { Custom } from '../../models/Custom';
+import { Observable, of, switchMap } from 'rxjs';
+import { User } from 'firebase/auth';
+import { collectionData } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ItallapService {
 
-  constructor(private firestore: AngularFirestore, private afAuth: AngularFireAuth) { }
+  constructor(private firestore: Firestore, private auth: Auth) {}
 
-  create(ital: Italok){
-    return this.firestore.collection<Italok>('Italok').add(ital);
+  create(ital: Italok) {
+    const italokRef = collection(this.firestore, 'Italok') as CollectionReference<Italok>;
+    return addDoc(italokRef, ital);
   }
 
-
   addToCart(ital: Italok): Observable<any> {
-    return this.afAuth.authState.pipe(
+    return authState(this.auth).pipe(
       switchMap(user => {
         if (!user) {
           console.log('Felhasználó nincs bejelentkezve!');
-          return of(null); // Nem sikerült hozzáadni a kosárhoz, mert a felhasználó nincs bejelentkezve
+          return of(null);
         }
-        // Felhasználó be van jelentkezve, hozzáadjuk a kosarához az italt
         const userEmail = user.email;
         if (!userEmail) {
           console.error('Felhasználó e-mail címe nincs megadva!');
-          return of(null); // Nem sikerült hozzáadni a kosárhoz, mert hiányzik a felhasználó e-mail címe
+          return of(null);
         }
         return this.addToCartFirestore(userEmail, ital);
       })
     );
   }
 
-  private addToCartFirestore(userEmail: string, ital: Italok): Observable<ItalokFS> {
+  private addToCartFirestore(userEmail: string, ital: Italok): Observable<any> {
     return new Observable<any>(observer => {
-      // Generáljuk a italID-t
-      const italID = this.firestore.createId();
+      const italID = this.generateId();
+      const cartDocRef = doc(this.firestore, `carts/${userEmail}/cart/${italID}`);
 
-      // Hozzáadjuk a dokumentumot a Firestore-hoz a megadott italID-vel
-      this.firestore.collection(`carts/${userEmail}/cart`).doc(italID).set({ ...ital, italID })
+      setDoc(cartDocRef, { ...ital, italID })
         .then(() => {
-          console.log('Pizza hozzáadva a kosárhoz!', italID);
-          // Visszaadjuk a hozzáadott italt, hogy a hívó oldalon is elérhető legyen
+          console.log('Ital hozzáadva a kosárhoz!', italID);
           observer.complete();
         })
         .catch(error => {
-          console.error('Hiba történt az italok hozzáadása közben:', error);
-          observer.next(null); // Nem sikerült hozzáadni az italt a kosárhoz
+          console.error('Hiba történt az ital hozzáadásakor:', error);
+          observer.next(null);
           observer.complete();
         });
     });
   }
 
-
-  addToCartCustom(custom : Custom): Observable<any> {
-    return this.afAuth.authState.pipe(
+  addToCartCustom(custom: Custom): Observable<any> {
+    return authState(this.auth).pipe(
       switchMap(user => {
         if (!user) {
           console.log('Felhasználó nincs bejelentkezve!');
-          return of(null); // Nem sikerült hozzáadni a kosárhoz, mert a felhasználó nincs bejelentkezve
+          return of(null);
         }
-        // Felhasználó be van jelentkezve, hozzáadjuk a kosarához az italt
         const userEmail = user.email;
         if (!userEmail) {
           console.error('Felhasználó e-mail címe nincs megadva!');
-          return of(null); // Nem sikerült hozzáadni a kosárhoz, mert hiányzik a felhasználó e-mail címe
+          return of(null);
         }
         return this.addToCartFirestoreCustom(userEmail, custom);
       })
     );
   }
 
-  private addToCartFirestoreCustom(userEmail: string, ital: Custom): Observable<ItalokFS> {
+  private addToCartFirestoreCustom(userEmail: string, ital: Custom): Observable<any> {
     return new Observable<any>(observer => {
-      // Generáljuk a italID-t
-      const italID = this.firestore.createId();
+      const italID = this.generateId();
+      const cartDocRef = doc(this.firestore, `carts/${userEmail}/cart/${italID}`);
 
-      // Hozzáadjuk a dokumentumot a Firestore-hoz a megadott italID-vel
-      this.firestore.collection(`carts/${userEmail}/cart`).doc(italID).set({ ...ital, italID })
+      setDoc(cartDocRef, { ...ital, italID })
         .then(() => {
-          console.log('Pizza hozzáadva a kosárhoz!', italID);
-          // Visszaadjuk a hozzáadott italt, hogy a hívó oldalon is elérhető legyen
+          console.log('Custom ital hozzáadva a kosárhoz!', italID);
           observer.complete();
         })
         .catch(error => {
-          console.error('Hiba történt az italok hozzáadása közben:', error);
-          observer.next(null); // Nem sikerült hozzáadni az italt a kosárhoz
+          console.error('Hiba történt az custom ital hozzáadása közben:', error);
+          observer.next(null);
           observer.complete();
         });
     });
   }
 
-
-  addItalToFirestore(ital: ItalokFS): Promise<DocumentReference<ItalokFS>> {
-    return this.firestore.collection<ItalokFS>('italok').add(ital);
+  addItalToFirestore(ital: ItalokFS): Promise<any> {
+    const italokRef = collection(this.firestore, 'italok') as CollectionReference<ItalokFS>;
+    return addDoc(italokRef, ital);
   }
 
+  private generateId(): string {
+    // Új dokumentum ID generálása
+    return doc(collection(this.firestore, '_')).id;
+  }
 }

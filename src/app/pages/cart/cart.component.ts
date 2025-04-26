@@ -1,31 +1,33 @@
-import {Component, OnInit} from '@angular/core';
-import {AngularFireAuth} from "@angular/fire/compat/auth";
-import {CartService} from "../../shared/services/cart.service";
-import {Cart} from "../../models/Cart";
+import { Component, OnInit } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
+import { CartService } from "../../shared/services/cart.service";
+import { Cart } from "../../models/Cart";
+import { inject } from '@angular/core';
 
 @Component({
   standalone: false,
   selector: 'app-cart',
   templateUrl: './cart.component.html',
-  styleUrl: './cart.component.scss'
+  styleUrls: ['./cart.component.scss']
 })
-export class CartComponent implements OnInit{
-  cartItems: Cart[]=[];
-  fizetendo: number=0;
+export class CartComponent implements OnInit {
+  cartItems: Cart[] = [];
+  fizetendo: number = 0;
   orderTime: Date = new Date();
   currentEmail: string = '';
 
-  constructor(private afAuth: AngularFireAuth, private cartService: CartService) { }
+  private auth: Auth = inject(Auth);  // Az új mód a DI (dependency injection) használatára Angularban.
+
+  constructor(private cartService: CartService) { }
 
   ngOnInit(): void {
-    this.afAuth.authState.subscribe(user => {
+    // Felhasználó állapotának figyelése
+    this.auth.onAuthStateChanged(user => {
       if (user) {
         const userEmail = user.email;
         if (userEmail !== this.currentEmail) {
           if (typeof userEmail === "string") {
             this.currentEmail = userEmail;
-          }
-          if (typeof userEmail === "string") {
             this.loadCartItems(userEmail);
           }
         }
@@ -36,7 +38,7 @@ export class CartComponent implements OnInit{
   }
 
   getLoggedInUserEmail(): void {
-    this.afAuth.authState.subscribe(user => {
+    this.auth.onAuthStateChanged(user => {
       if (user) {
         const userEmail = user.email;
         if (typeof userEmail === "string" && userEmail !== this.currentEmail) {
@@ -53,16 +55,14 @@ export class CartComponent implements OnInit{
     this.cartService.getCartItems(userEmail).subscribe(items => {
       this.cartItems = items;
       this.osszar();
-
     });
-
   }
 
   deleteItem(italID: string): void {
-    this.afAuth.authState.subscribe(user => {
+    this.auth.onAuthStateChanged(user => {
       if (user) {
         const userEmail = user.email;
-        if (!confirm('Biztosan törölni szeretnéd ezt az Italt?')) {
+        if (!confirm('Biztosan törölni szeretnéd ezt az italt?')) {
           return;
         }
 
@@ -75,13 +75,12 @@ export class CartComponent implements OnInit{
     });
   }
 
-  osszar(): void {//Fizetendo kiiaratashoz
-    this.fizetendo = this.cartItems.reduce((total, item) => total + item.ar,0);
+  osszar(): void { // Fizetendő összeg kiszámítása
+    this.fizetendo = this.cartItems.reduce((total, item) => total + item.ar, 0);
   }
 
-
-  deleteAllItems() {//"Megrendelés"
-    this.afAuth.authState.subscribe(user => {
+  deleteAllItems(): void { // "Megrendelés" - Kosár ürítése
+    this.auth.onAuthStateChanged(user => {
       if (user) {
         const userEmail = user.email;
         if (typeof userEmail === "string") {
@@ -92,7 +91,4 @@ export class CartComponent implements OnInit{
       }
     });
   }
-
-
-
 }

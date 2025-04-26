@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthGuard } from './shared/services/auth.guard';
+import { authGuard } from './shared/services/auth.guard';
 
 const routes: Routes = [
   {
@@ -10,9 +10,9 @@ const routes: Routes = [
   },
   { path: 'login', loadChildren: () => import('./pages/login/login.module').then(m => m.LoginModule) },
   { path: 'register', loadChildren: () => import('./pages/register/register.module').then(m => m.RegisterModule) },
-  { path: 'itallap', loadChildren: () => import('./pages/itallap/itallap.module').then(m => m.ItallapModule), canActivate: [AuthGuard]},
+  { path: 'itallap', loadChildren: () => import('./pages/itallap/itallap.module').then(m => m.ItallapModule), canActivate: [authGuard]},
   { path: 'cart', loadChildren: () => import('./pages/cart/cart.module').then(m => m.CartModule)},
-  { path: 'egyedi', loadChildren: () => import('./pages/egyedi/egyedi.module').then(m => m.EgyediModule), canActivate: [AuthGuard] },
+  { path: 'egyedi', loadChildren: () => import('./pages/egyedi/egyedi.module').then(m => m.EgyediModule), canActivate: [authGuard] },
   { path: 'elerhetoseg', loadChildren: () => import('./pages/elerhetoseg/elerhetoseg.module').then(m => m.ElerhetosegModule) },
   {
     path: '**',

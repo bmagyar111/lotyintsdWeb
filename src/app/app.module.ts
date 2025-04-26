@@ -3,24 +3,31 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AngularFireStorageModule } from '@angular/fire/compat/storage';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+
+import { environment } from '../environments/environment.development';
+
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideFirestore, getFirestore } from '@angular/fire/firestore';
+import { provideAuth, getAuth } from '@angular/fire/auth';
+import { provideStorage, getStorage } from '@angular/fire/storage';
+import { AuthService } from './shared/services/auth.service';
+import { AUTH_SERVICE } from './shared/services/auth.service.token';
+
+
 import { LoginModule } from './pages/login/login.module';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+// Angular Material
 import { MatButtonModule } from '@angular/material/button';
-import { AngularFirestore, AngularFirestoreModule } from '@angular/fire/compat/firestore';
-import { AngularFireModule } from '@angular/fire/compat';
-import { environment } from '../environments/environment.development';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { HttpClientModule } from '@angular/common/http';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { AngularFireAuth, AngularFireAuthModule } from '@angular/fire/compat/auth';
 
 @NgModule({
-  declarations: [ AppComponent ],
+  declarations: [AppComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -32,14 +39,18 @@ import { AngularFireAuth, AngularFireAuthModule } from '@angular/fire/compat/aut
     MatButtonModule,
     MatIconModule,
     MatListModule,
-    AngularFireModule.initializeApp(environment.firebase),
-    AngularFirestoreModule,
-    AngularFireAuthModule,
-    AngularFireStorageModule,
     LoginModule
   ],
   providers: [
-    provideAnimationsAsync()
+    // FONTOS: Ez a helyes firebase setup!
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideFirestore(() => getFirestore()),
+    provideAuth(() => getAuth()),
+    provideStorage(() => getStorage()),
+    {
+      provide: AUTH_SERVICE,
+      useClass: AuthService
+    }
   ],
   bootstrap: [AppComponent]
 })
