@@ -3,6 +3,8 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from './shared/services/auth.service';
+import { User } from 'firebase/auth';
+
 @Component({
   standalone: false,
   selector: 'app-root',
@@ -12,11 +14,11 @@ import { AuthService } from './shared/services/auth.service';
 export class AppComponent implements OnInit{
   title = 'lotyintsd';
   page='';
-  userActive?: firebase.default.User | true;
+  userActive?: User | true;
 
 
   @Input() currentPage: string = '';
-  @Input() loggedInUser?: firebase.default.User | true;
+  @Input() loggedInUser?: User | true;
   @Output() selectedPage: EventEmitter<string> = new EventEmitter();
   @Output() onCloseSidenav: EventEmitter<boolean> = new EventEmitter();
   @Output() onLogout: EventEmitter<boolean> = new EventEmitter();
